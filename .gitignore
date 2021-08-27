@@ -1,0 +1,8 @@
+# No image file
+img
+
+# Ignore mount point for image file
+mnt/
+
+# No object files
+bin/
