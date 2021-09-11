@@ -46,8 +46,8 @@ stage1:
     jmp 0x0000:.cs_jmp
 
 .cs_jmp:
-    mov sp, 0xF000
-    mov [DRIVE], dl
+	mov sp, 0xF000
+	mov [DRIVE], dl
 
 	mov al, [BPB.SectorsPerCluster]
 	mov [CLUSTER_SIZE], ax

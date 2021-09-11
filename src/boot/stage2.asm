@@ -144,10 +144,10 @@ load_elf:
     jne .next
 
     ; Load segment
-    mov rdi, [ebp+ELFp_vaddr]
-    mov rsi, [ebp+ELFp_offset]
+    mov rdi, [rbp+ELFp_vaddr]
+    mov rsi, [rbp+ELFp_offset]
     add rsi, ELF_BASE
-    mov rcx, [ebp+ELFp_filesz]
+    mov rcx, [rbp+ELFp_filesz]
     rep movsb
 
 .next:
