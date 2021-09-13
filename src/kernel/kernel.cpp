@@ -21,27 +21,36 @@ static void init()
   kernel::heap_init(heap, 1 << 21);
 
   // Initialize IDT
-  kernel::idt_init();
+  // kernel::idt_init();
+}
+
+static void print_memory_map(kernel::mem_info_t* mem_info, uint64_t amt)
+{
+  size_t total = 0;
+
+  kernel::printf("Base                | Length              | Type\n");
+  kernel::printf("--------------------+---------------------+-----\n");
+
+  for (int i = 0; i < amt; i++)
+  {
+    kernel::mem_info_t* cur = &mem_info[i];
+    kernel::printf("%xl | %xl | %d\n", cur->base, cur->length, cur->type);
+    if (cur->type == 1)
+      total += cur->length;
+  }
+
+  total /= (1024 * 1024);
+
+  kernel::printf("\nTotal Memory = %l MB\n", total);
 }
 
 extern "C"
-void kmain()
+void kmain(kernel::mem_info_t* mem_info, uint64_t amt)
 {   
   init();
 
-  int* p1 = (int*) kernel::malloc(1024);
-  int* p2 = (int*) kernel::malloc(1);
-
-  kernel::printf("p1 = %xl\n", p1);
-  kernel::printf("p2 = %xl\n", p2);
-
-  kernel::free(p1);
-  p1 = (int*) kernel::malloc(512);
-
-  kernel::printf("p1 = %xl\n", p1);
-
-  kernel::printf("total allocated = %xl\n", kernel::get_allocated_memory());
-
+  print_memory_map(mem_info, amt);
+  
   while (1);
 }
 

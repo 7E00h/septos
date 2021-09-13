@@ -18,7 +18,10 @@ CLUSTER_START equ 0x1002 ; 0x1002 - 0x1006: Sector # of the first data cluster
 CLUSTER_SIZE  equ 0x1006 ; 0x1006 - 0x1008: Size of each cluster (in sectors)
 FAT           equ 0x2000 ; 0x2000 - 0x4000: 8 sectors of the FAT
                          ; (accounts for 2048 clusters or 16k sectors or 8 MB)
-ROOT_DIR      equ 0x4000 ; 0x3000 - 0x3200: First sector of the root directory
+ROOT_DIR      equ 0x4000 ; 0x4000 - 0x4200: First sector of the root directory
+MEM_INFO      equ 0x4200 ; 0x4200 - 0x4400: Memory information structure from INT 0x15, EAX = 0xE820
+                         ; This data is not parsed in the bootloader, but passed to kernel.
+MEM_INFO_AMT  equ 0x4400 ; 0x4400 - 0x4002: Amount of entries in the above structure
 PML4          equ 0x5000 ; Page
 PDP           equ 0x6000 ; Page
 

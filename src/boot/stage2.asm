@@ -4,6 +4,9 @@ ORG  0xA000
 %include "src/boot/structures.asm"
 
 stage2:
+    ; Retrieve memory information from BIOS
+    call get_mem_info
+
     ; Locate KERNEL.ELF
     mov si, ROOT_DIR
     mov di, KERNEL_STR
@@ -27,8 +30,11 @@ stage2:
 
     ; Copy to higher memory
     pushad
-
     push ds
+
+    ; Some BIOS interrupts may overwrite DS thereby destroying
+    ; the cached limit value. This is why it's called per
+    ; loop.
     call enable_unreal
 
     mov esi, 0x10000 - 4
@@ -112,6 +118,46 @@ mode_long:
     jmp GDT64.Code:long_mode
     hlt
 
+; ------------------
+; -- get_mem_info --
+; ------------------
+;
+; See https://wiki.osdev.org/Detecting_Memory_(x86)#BIOS_Function:_INT_0x15.2C_EAX_.3D_0xE820
+;
+
+get_mem_info:
+    pushad
+
+    xor bp, bp
+
+    xor ax, ax
+    mov es, ax
+    mov di, MEM_INFO
+    xor ebx, ebx
+    mov edx, 0x534D4150 ; Some magic number
+.loop
+    mov eax, 0xE820     ; Interrupt #
+    mov ecx, 24         ; Bytes to read
+
+    int 0x15
+
+    jc .done
+
+    cmp ebx, 0
+    je .done
+
+    cmp eax, 0x534D4150
+    jne .done
+
+    inc bp
+    add di, 24
+    jmp .loop
+
+.done
+    mov [MEM_INFO_AMT], bp
+    popad
+    ret
+
 no_kernel:
     hlt
     hlt
@@ -161,6 +207,10 @@ load_elf:
     jmp .load_segment
 
 .done:
+    ; Pass in MEM_INFO
+    mov rdi, MEM_INFO
+    xor rsi, rsi
+    mov si, [MEM_INFO_AMT]
     call r15
     hlt
 
