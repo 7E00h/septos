@@ -16,11 +16,11 @@
 DRIVE         equ 0x1000 ; 0x1000 - 0x1002: Drive # from BIOS (for int 0x13)
 CLUSTER_START equ 0x1002 ; 0x1002 - 0x1006: Sector # of the first data cluster
 CLUSTER_SIZE  equ 0x1006 ; 0x1006 - 0x1008: Size of each cluster (in sectors)
-FAT           equ 0x2000 ; 0x2000 - 0x3000: 8 sectors of the FAT
-                         ; (accounts for 1024 clusters or 8192 sectors or 4 MB)
-ROOT_DIR      equ 0x3000 ; 0x3000 - 0x3200: First sector of the root directory
-PML4          equ 0x4000 ; Page
-PDP           equ 0x5000 ; Page
+FAT           equ 0x2000 ; 0x2000 - 0x4000: 8 sectors of the FAT
+                         ; (accounts for 2048 clusters or 16k sectors or 8 MB)
+ROOT_DIR      equ 0x4000 ; 0x3000 - 0x3200: First sector of the root directory
+PML4          equ 0x5000 ; Page
+PDP           equ 0x6000 ; Page
 
 STAGE2        equ 0xA000 ; 0xA000 - 0xF000: STAGE2.BIN
 

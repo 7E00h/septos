@@ -2,6 +2,6 @@
 
 namespace kernel
 {
-    void kprintf(const char* fmt, ...);
+    void printf(const char* fmt, ...);
     void clear_screen();
 }

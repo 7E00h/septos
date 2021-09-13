@@ -4,28 +4,6 @@ ORG  0xA000
 %include "src/boot/structures.asm"
 
 stage2:
-    ; Enable "unreal" mode
-    ; This allows the CPU to address a full 4 GB range in real mode
-    cli
-    push ds
-
-    lgdt [GDT32.Pointer]
-
-    mov eax, cr0
-    or al, 1
-    mov cr0, eax
-
-    mov bx, GDT32.Data
-    mov ds, bx
-    mov es, bx
-    mov fs, bx
-    mov gs, bx
-
-    and al, 0xFE
-    mov cr0, eax
-    pop ds
-    sti
-
     ; Locate KERNEL.ELF
     mov si, ROOT_DIR
     mov di, KERNEL_STR
@@ -48,7 +26,10 @@ stage2:
     call fat32_readfile
 
     ; Copy to higher memory
-    pusha
+    pushad
+
+    push ds
+    call enable_unreal
 
     mov esi, 0x10000 - 4
     mov edi, [DST]
@@ -61,7 +42,8 @@ stage2:
     dec ebx
     jnz .loop
 .break:
-    popa
+    pop ds
+    popad
 
     cmp eax, 0x0FFFFFF8
     jge .done
@@ -72,6 +54,27 @@ stage2:
 .done:
     ; Kernel is loaded at 1 MB now
     ; Time to swtich to long mode
+    jmp mode_long
+
+enable_unreal:
+    push ds
+
+    lgdt [GDT32.Pointer]
+
+    mov eax, cr0
+    or al, 1
+    mov cr0, eax
+
+    jmp $+2
+
+    mov bx, GDT32.Data
+    mov ds, bx
+
+    and al, 0xFE
+    mov cr0, eax
+    
+    pop ds
+    ret
 
 mode_long:
     ; -- Switch to long mode --
@@ -136,6 +139,7 @@ load_elf:
     add rbp, [rbp+ELFe_phoff]     ; # Offset of program header
 
 .load_segment:
+    cmp bx, 0
     jz .done
 
     ; Check type
@@ -148,6 +152,7 @@ load_elf:
     mov rsi, [rbp+ELFp_offset]
     add rsi, ELF_BASE
     mov rcx, [rbp+ELFp_filesz]
+
     rep movsb
 
 .next:
@@ -162,13 +167,6 @@ load_elf:
 GDT32:
     .Null: equ $ - GDT32
     dq 0
-    .Code: equ $ - GDT32
-    dw 0xFFFF     ; Limit 0:15
-    dw 0x0000     ; Base 0:15
-    db 0x00       ; Base 16:23
-    db 0b10011010 ; Access Byte
-    db 0b01001111 ; Flags & Limit 16:19
-    db 0x00       ; Base 24:31
     .Data: equ $ - GDT32
     dw 0xFFFF     ; Limit 0:15
     dw 0x0000     ; Base 0:15

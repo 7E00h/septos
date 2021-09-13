@@ -106,6 +106,10 @@ fat32_readfile:
 	mov cx, 16 ; Make sure it doesn't load more than 64k at a time
 
 .read_cluster:
+	; If done...
+	cmp eax, 0x0FFFFFF8
+	jge .done
+
 	; Read cluster into memory
 	dec cx
 	push eax
@@ -117,10 +121,6 @@ fat32_readfile:
 	pop eax
 	shl eax, 2
 	mov eax, [FAT + eax]
-
-	; If done...
-	cmp eax, 0x0FFFFFF8
-	jge .done
 
 	; More than 64k?
 	cmp cx, 0
@@ -136,7 +136,7 @@ fat32_readfile:
 DAP:
 	.Size      db 16     ; Size of DAP
 	.Zero      db 0      ; Zero
-	.Amount    dw 8      ; # of sectors to read
+	.Amount    dw 16     ; # of sectors to read
 	.Offset    dw FAT    ; Destination offset
 	.Segment   dw 0x0000 ; Destination segment
 	.StartLow  dd 0
