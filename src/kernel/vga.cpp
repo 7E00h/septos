@@ -13,6 +13,9 @@ static void advance();
 template <typename T>
 static void write_hex(T num);
 
+template <typename T>
+void write_uint(T num);
+
 uint16_t* VGA = (uint16_t*) 0xB8000;
 
 uint8_t row = 0;
@@ -22,6 +25,8 @@ void kernel::printf(const char* fmt, ...)
 {
     va_list args;
     va_start(args, fmt);
+    short short_arg;
+    char char_arg;
 
     while (*fmt)
     {
@@ -35,11 +40,11 @@ void kernel::printf(const char* fmt, ...)
                     break;    
 
                 case 'd':
-                    write_int(va_arg(args, int));
+                    write_uint(va_arg(args, int));
                     break;
 
                 case 'l':
-                    write_long(va_arg(args, long));
+                    write_uint(va_arg(args, long));
                     break;
 
                 case 'x':
@@ -116,24 +121,8 @@ void write_str(char* str)
         write_char(*str++);
 }
 
-void write_int(int num)
-{
-    if (!num)
-    {
-        write_char('0');
-        return;
-    }
-
-    char buffer[16];
-    buffer[15] = 0;
-    int idx = 14;
-    for (; idx >= 0 && num > 0; idx--, num /= 10)
-        buffer[idx] = (num % 10) + '0';
-
-    write_str(buffer + idx + 1);
-}
-
-void write_long(long num)
+template <typename T>
+void write_uint(T num)
 {
     if (!num)
     {
@@ -142,8 +131,8 @@ void write_long(long num)
     }
 
     char buffer[32];
-    buffer[31] = 0;
-    int idx = 14;
+    buffer[31] = '\0';
+    int idx = 30;
     for (; idx >= 0 && num > 0; idx--, num /= 10)
         buffer[idx] = (num % 10) + '0';
 

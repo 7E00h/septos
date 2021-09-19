@@ -1,6 +1,7 @@
 #pragma once
 
 #include <stdint.h>
+#include <stddef.h>
 
 namespace kernel
 {
@@ -13,6 +14,9 @@ namespace kernel
     } __attribute__((packed));
 
     using frame_t = uint64_t;
+
+    void    parse_mem_info(mem_info_t* mem_info, size_t amt);
+    size_t  get_memory();
 
     void    frame_init();
     frame_t frame_alloc();

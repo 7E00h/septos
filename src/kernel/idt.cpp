@@ -1,5 +1,6 @@
 #include "idt.hpp"
 
+#include <kernel/asm/asm.hpp>
 #include <kernel/vga.hpp>
 
 struct idt_entry_t
@@ -28,13 +29,6 @@ struct idtr_t
     uint64_t addr;
 } __attribute__((packed));
 
-extern "C"
-{
-    void _asm_lidt(uint64_t pointer);
-    void _asm_cli();
-    void _asm_sti();
-}
-
 __attribute__((interrupt))
 void default_handler(kernel::int_frame_t* frame)
 {
@@ -58,7 +52,6 @@ void kernel::idt_init()
     };
 
     _asm_lidt((uint64_t) &ptr);
-    _asm_sti();
 }
 
 void kernel::idt_install_gate(kernel::isr_t handler, int index)

@@ -9,9 +9,24 @@ using namespace kernel;
 static uint64_t bitmap[BITMAP_SIZE];
 static int cached_idx = -1, cached_bit = -1;
 
+static size_t total_memory = 0;
+
 #define CALC_ADDR(idx, bit) (((idx << 6) + bit) << 21)
 #define SET_BIT(idx, bit) (bitmap[idx] |= (1 << bit))
 #define CLR_BIT(idx, bit) (bitmap[idx] &= ~(1 << bit))
+
+void kernel::parse_mem_info(mem_info_t* mem_info, size_t amt)
+{
+
+    for (int idx = 0; idx < amt; idx++)
+        if (mem_info[idx].type == 1)
+            total_memory += mem_info[idx].length;
+}
+
+size_t kernel::get_memory()
+{
+    return total_memory;
+}
 
 void kernel::frame_init()
 {

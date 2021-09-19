@@ -1,7 +1,7 @@
 SRC := src
 BIN := bin
 
-KRN_DIR   = src/kernel src/kernel/memory src/kernel/asm
+KRN_DIR   = src/kernel src/kernel/memory src/kernel/asm src/kernel/pci src/kernel/drivers
 KRN_SRC   = $(foreach dir,  $(KRN_DIR), $(wildcard $(dir)/*.cpp))
 KRN_OBJ   = $(foreach file, $(KRN_SRC), \
 				$(subst $(SRC), $(BIN), $(file:.cpp=.o)))
@@ -12,13 +12,23 @@ KRN_ASM_OBJ = $(foreach file, $(KRN_ASM_SRC), \
 
 CC = clang++
 CFLAGS = -c -ffreestanding -fno-builtin -nostdlib -O0 \
-			-Isrc/ \
-			-target x86_64-pc-none-elf \
-			-mno-sse -mno-mmx \
+			-Isrc/                                    \
+			-target x86_64-pc-none-elf                \
+			-mno-sse -mno-mmx                         \
+			-g
+
+QEMU_DRIVE = -drive id=disk,file=hdd,if=none      \
+			 -device ahci,id=ahci                 \
+			 -device ide-hd,drive=disk,bus=ahci.0
+
+QEMU_FLAGS = $(QEMU_DRIVE)   \
+			 -m 64M         \
+			 -monitor stdio \
+			 -hdd img
 
 $(KRN_ASM_OBJ): bin/%.o: src/%.asm
 	mkdir -p $(subst $(SRC), $(BIN), $(KRN_DIR))
-	nasm -f elf64 -o $@ $<
+	nasm -F dwarf -g -f elf64 -o $@ $<
 
 $(KRN_OBJ): bin/%.o: src/%.cpp
 	mkdir -p $(subst $(SRC), $(BIN), $(KRN_DIR))
@@ -38,10 +48,10 @@ bin/stage1.bin: src/boot/stage1.asm
 	dd if=bin/stage1.bin of=img bs=1 skip=90 seek=90 conv=notrunc
 
 debug: bin/stage1.bin bin/stage2.bin bin/kernel.elf
-	qemu-system-x86_64 -s -S -m 64M -monitor stdio -hdd img
+	qemu-system-x86_64 -s -S $(QEMU_FLAGS)
 
 run: bin/stage1.bin bin/stage2.bin bin/kernel.elf
-	qemu-system-x86_64 -m 64M -monitor stdio -hdd img
+	qemu-system-x86_64 $(QEMU_FLAGS)
 
 clean:
 	rm -rf bin/*
