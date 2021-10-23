@@ -2,7 +2,10 @@
 
 #include <kernel/memory/physical.hpp>
 #include <kernel/memory/kmalloc.hpp>
+#include <kernel/drivers/nvme.hpp>
+#include <kernel/drivers/pic.hpp>
 #include <kernel/pci/pci.hpp>
+#include <kernel/asm/asm.hpp>
 #include <kernel/idt.hpp>
 #include <kernel/vga.hpp>
 
@@ -21,21 +24,25 @@ static void init()
   void* heap = (void*) kernel::frame_alloc();
   kernel::heap_init(heap, 1 << 21);
 
-  // Initialize IDT
+  // Initialize IDT and PIC
   kernel::idt_init();
+  kernel::pic_init();
+  _asm_sti();
 
   // PCI
   kernel::pci_init();
-
   kernel::pci_endpoint* dev = kernel::pci_device_array();
 
   while (dev->vendor_id != 0xFFFF)
   {
-    if (dev->cls == 0x01 && dev->subcls == 0x06)
+    if (dev->cls == 0x01 && dev->subcls == 0x08)
     {
-      kernel::printf("SATA device found (%d, %d, %d)\n", dev->bus, dev->device, 0);
-      uint32_t bar5 = dev->get_data_32(kernel::PCI::HDR_BAR5);
-      kernel::printf("- BAR5: %x\n", bar5);
+      kernel::printf("NVMe device found (%d, %d, %d)\n", dev->bus, dev->device, 0);
+      uint32_t bar0 = dev->get_data_32(kernel::PCI::HDR_BAR0);
+      // bar0 &= ~(0x0F);
+      kernel::nvme_regs* nvme_regs = (kernel::nvme_regs*) bar0;
+      kernel::printf("BAR0: %x\n", bar0);
+      // kernel::nvme_block_dev dev(nvme_regs);
     }
 
     dev++;

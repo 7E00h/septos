@@ -15,15 +15,15 @@ CFLAGS = -c -ffreestanding -fno-builtin -nostdlib -O0 \
 			-Isrc/                                    \
 			-target x86_64-pc-none-elf                \
 			-mno-sse -mno-mmx                         \
+			-fno-rtti -fno-exceptions                 \
 			-g
 
-QEMU_DRIVE = -drive id=disk,file=hdd,if=none      \
-			 -device ahci,id=ahci                 \
-			 -device ide-hd,drive=disk,bus=ahci.0
+QEMU_DRIVE = -drive id=nvm,file=hdd,if=none           \
+			 -device nvme,serial=deadbeef,drive=nvm
 
 QEMU_FLAGS = $(QEMU_DRIVE)   \
-			 -m 64M         \
-			 -monitor stdio \
+			 -m 64M          \
+			 -monitor stdio  \
 			 -hdd img
 
 $(KRN_ASM_OBJ): bin/%.o: src/%.asm

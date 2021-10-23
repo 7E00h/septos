@@ -87,7 +87,7 @@ void write_hex(T num)
     int len = sizeof(T) * 2;
     int idx = 18;
 
-    while (len >= 0)
+    while (len > 0)
     {
         uint8_t nibble = num & 0b1111;
         buffer[idx--]  = HEX[nibble];

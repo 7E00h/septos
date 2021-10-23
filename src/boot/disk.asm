@@ -1,3 +1,14 @@
+; ----------
+; -- TODO --
+; ----------
+;
+; Since this VFAT driver keeps moving the cluster chain
+; to higher and higher values, fat32_readfile must be
+; re-written. Instead of loading the first N sectors of the
+; FAT, for each cluster we must dynamically load the sector
+; of the FAT it resides in.
+;
+
 BITS 16
 
 DIRENT_NAME      equ 0  ; 8.3 file name
@@ -136,7 +147,7 @@ fat32_readfile:
 DAP:
 	.Size      db 16     ; Size of DAP
 	.Zero      db 0      ; Zero
-	.Amount    dw 16     ; # of sectors to read
+	.Amount    dw 24     ; # of sectors to read
 	.Offset    dw FAT    ; Destination offset
 	.Segment   dw 0x0000 ; Destination segment
 	.StartLow  dd 0

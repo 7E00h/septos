@@ -32,7 +32,21 @@ struct idtr_t
 __attribute__((interrupt))
 void default_handler(kernel::int_frame_t* frame)
 {
-    kernel::printf("Interrupt called!");
+    kernel::printf("Generic interrupt handler called...\n");
+}
+
+__attribute__((interrupt))
+void pf_handler(kernel::int_frame_t* frame)
+{
+    kernel::printf("#GPF... halting\n");
+    __asm__("hlt");
+}
+
+__attribute__((interrupt))
+void df_handler(kernel::int_frame_t* frame)
+{
+    kernel::printf("Double Fault... halting\n");
+    __asm__("hlt");
 }
 
 void kernel::idt_init()
@@ -42,10 +56,15 @@ void kernel::idt_init()
     for (int idx = 0; idx < 256 * 16; idx++)
         *byte++ = 0;
 
-    // Initialize table with default handler
+    // Initialize table entries with default handler
     for (int idx = 0; idx < 256; idx++)
         kernel::idt_install_gate(default_handler, idx);
 
+    // Install specific interrupts
+    kernel::idt_install_gate(df_handler, 0x08);
+    kernel::idt_install_gate(pf_handler, 0x0D);
+
+    // Load IDTR
     idtr_t ptr = {
         256 * 16,
         (uint64_t) IDT
