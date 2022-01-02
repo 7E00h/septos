@@ -1,13 +1,4 @@
-; ----------
-; -- TODO --
-; ----------
-;
-; Since this VFAT driver keeps moving the cluster chain
-; to higher and higher values, fat32_readfile must be
-; re-written. Instead of loading the first N sectors of the
-; FAT, for each cluster we must dynamically load the sector
-; of the FAT it resides in.
-;
+%include "src/boot/structures.asm"
 
 BITS 16
 
@@ -26,12 +17,12 @@ DIRENT_CLUS_LOW  equ 26 ; Low 16 bits of cluster #
 ;
 
 disk_read:
-	pusha
+	pushad
 	mov ah, 0x42
 	mov dl, [DRIVE]
 	mov si, DAP
 	int 0x13
-	popa
+	popad
 	ret
 
 ; --------------------
@@ -44,9 +35,17 @@ disk_read:
 ;
 
 fat32_clus2sec:
+	push ebx
+	push edx
+
+	mov ebx, [CLUSTER_START]
+
 	sub eax, 2
 	mul word [CLUSTER_SIZE]
-	add ax, [CLUSTER_START]
+	add eax, ebx
+
+	pop edx
+	pop ebx
 	ret
 
 ; --------------------
@@ -56,7 +55,7 @@ fat32_clus2sec:
 ; Locates a file in a directory
 ; -> SI: directory pointer
 ;    DI: file name pointer
-; <- DI: cluster # (0 for not found)
+; <- EDI: cluster # (0 for not found)
 ;
 
 fat32_findfile:
@@ -92,6 +91,9 @@ fat32_findfile:
 	jmp .loop_entry
 
 .found:
+	xor edi, edi
+	mov di, [si + DIRENT_CLUS_HIGH]
+	shl edi, 16
 	mov di, [si + DIRENT_CLUS_LOW]
 	ret
 
@@ -105,15 +107,12 @@ fat32_findfile:
 ; --------------------
 ;
 ; Reads a file into memory
-; -> AX: cluster #
+; -> EAX: cluster #
 ;    ES:DI: destination
 ; <- EAX: cluster value
 ;
 
 fat32_readfile:
-	mov word [DAP.Amount], 8
-	mov [DAP.Segment], es
-	mov [DAP.Offset], di
 	mov cx, 16 ; Make sure it doesn't load more than 64k at a time
 
 .read_cluster:
@@ -121,34 +120,89 @@ fat32_readfile:
 	cmp eax, 0x0FFFFFF8
 	jge .done
 
+	; Configure DAP
+	mov word [DAP.Amount], 8
+	mov [DAP.Segment], es
+	mov [DAP.Offset], di
+
 	; Read cluster into memory
 	dec cx
 	push eax
 	call fat32_clus2sec
 	mov [DAP.StartLow], eax
-	call disk_read
 
-	; Get next cluster
+	call disk_read
 	pop eax
-	shl eax, 2
-	mov eax, [FAT + eax]
+
+	; Get next cluster value
+	call fat32_readcluster
 
 	; More than 64k?
 	cmp cx, 0
 	je .done
 
 .next:
-	add word [DAP.Offset], 0x1000
+	; mov [DAP.Offset], di
+	; add word [DAP.Offset], 0x1000
+	add di, 0x1000
+
 	jmp .read_cluster
 
 .done:
 	ret
 
+; -----------------------
+; -- fat32_readcluster --
+; -----------------------
+;
+; Reads a cluster value from the FAT.
+; Will dynamically load the appropriate FAT sector.
+; This is slow and of course can be improved but >lazy.
+; -> EAX: cluster index
+; <- EAX: cluster value
+;
+
+fat32_readcluster:
+	push ebx
+	push edx
+	push ecx
+	push ds
+
+
+	xor edx, edx
+	mov ds, dx
+	mov ebx, 128
+
+	div ebx
+
+	; Sector # is in EAX
+	; Cluster # is in EDX
+	shl edx, 2 ; * 4 because 4 bytes per entry
+
+	; The first FAT comes right after reserved sectors.
+	add ax, [FAT_SECTOR]
+
+	; Load FAT sector
+	mov word [DAP.Segment], 0
+	mov word [DAP.Amount], 1
+	mov word [DAP.Offset], FAT
+	mov [DAP.StartLow], eax
+	call disk_read
+
+	mov eax, [FAT + edx]
+
+	pop ds
+	pop ecx
+	pop edx
+	pop ebx
+
+	ret
+
 DAP:
 	.Size      db 16     ; Size of DAP
 	.Zero      db 0      ; Zero
-	.Amount    dw 24     ; # of sectors to read
-	.Offset    dw FAT    ; Destination offset
+	.Amount    dw 1      ; # of sectors to read
+	.Offset    dw BPB    ; Destination offset
 	.Segment   dw 0x0000 ; Destination segment
 	.StartLow  dd 0
 	.StartHigh dd 0

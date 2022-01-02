@@ -14,8 +14,11 @@
 ;
 
 DRIVE         equ 0x1000 ; 0x1000 - 0x1002: Drive # from BIOS (for int 0x13)
-CLUSTER_START equ 0x1002 ; 0x1002 - 0x1006: Sector # of the first data cluster
 CLUSTER_SIZE  equ 0x1006 ; 0x1006 - 0x1008: Size of each cluster (in sectors)
+FAT_SECTOR    equ 0x1008 ; 0x1008 - 0x100A: Beginning sector of the first FAT
+PART_OFFSET   equ 0x1100 ; Offset of the FAT32 partition
+BPB           equ 0x1200 ; BPB
+CLUSTER_START equ 0x1220 ; Sector # of the first data cluster
 FAT           equ 0x2000 ; 0x2000 - 0x5000: 24 sectors of the FAT
                          ; (accounts for 3072 clusters or 24576 sectors or 12 MB)
 ROOT_DIR      equ 0x5000 ; 0x5000 - 0x5200: First sector of the root directory
@@ -40,3 +43,31 @@ ELFp_type   equ 0x00
 ELFp_offset equ 0x08
 ELFp_vaddr  equ 0x10
 ELFp_filesz equ 0x20
+    
+BPB_OEM:               equ 0x03
+BPB_BytesPerSector:    equ 0x0B
+BPB_SectorsPerCluster: equ 0x0D
+BPB_ReservedSectors:   equ 0x0E
+BPB_NumberOfFATs:      equ 0x10
+BPB_NumberOfDirEnts:   equ 0x11
+BPB_SectorsInVolume:   equ 0x13
+BPB_MediaDescType:     equ 0x15
+BPB_SectorsPerFAT:     equ 0x16
+BPB_SectorsPerTrack:   equ 0x18
+BPB_NumberOfHeads:     equ 0x1A
+BPB_HiddenSectors:     equ 0x1C
+BPB_SectorCountLarge:  equ 0x20
+
+BPB_SectorsPerFAT32:   equ 0x24 ; TODO fix misleading name!
+BPB_Flags:             equ 0x28
+BPB_FATVersion:        equ 0x2A
+BPB_RootDirCluster:    equ 0x2C
+BPB_FSInfoSector:      equ 0x30
+BPB_BackupBootSector:  equ 0x32
+BPB_Reserved:          equ 0x30
+BPB_DriveNumber:       equ 0x40
+BPB_FlagsNT:           equ 0x41
+BPB_Signature:         equ 0x42
+BPB_VIDNumber:         equ 0x43
+BPB_VolumeLabelStr:    equ 0x40
+BPB_SysIDStr:          equ 0x52

@@ -14,6 +14,7 @@ namespace kernel
     } __attribute__((packed));
 
     using frame_t = uint64_t;
+    using paddr_t = uint8_t*;
 
     void    parse_mem_info(mem_info_t* mem_info, size_t amt);
     size_t  get_memory();

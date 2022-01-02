@@ -35,7 +35,7 @@ $(KRN_OBJ): bin/%.o: src/%.cpp
 	$(CC) $(CFLAGS) -o $@ $<
 
 bin/kernel.elf: $(KRN_OBJ) $(KRN_ASM_OBJ)
-	ld.lld -T src/link.lds -o bin/kernel.elf $(KRN_OBJ) $(KRN_ASM_OBJ)
+	ld -T src/link.lds -o bin/kernel.elf $(KRN_OBJ) $(KRN_ASM_OBJ)
 	sudo ./fs cp bin/kernel.elf KERNEL.ELF
 
 bin/stage2.bin: src/boot/stage2.asm
@@ -44,8 +44,7 @@ bin/stage2.bin: src/boot/stage2.asm
 
 bin/stage1.bin: src/boot/stage1.asm
 	nasm -f bin -o bin/stage1.bin src/boot/stage1.asm
-	dd if=bin/stage1.bin of=img bs=1 count=3 conv=notrunc
-	dd if=bin/stage1.bin of=img bs=1 skip=90 seek=90 conv=notrunc
+	dd if=bin/stage1.bin of=img bs=1 count=446 conv=notrunc
 
 debug: bin/stage1.bin bin/stage2.bin bin/kernel.elf
 	qemu-system-x86_64 -s -S $(QEMU_FLAGS)

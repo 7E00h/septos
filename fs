@@ -1,13 +1,14 @@
 #!/bin/bash
 
 _mount() {
-	losetup /dev/loop0 img
-	mount -t vfat -o uid=1000,gid=1000,shortname=win95 /dev/loop0 mnt/
+	losetup /dev/loop15 img
+	partprobe /dev/loop15
+	mount -t vfat -o uid=1000,gid=1000,shortname=win95 /dev/loop15p1 mnt/
 }
 
 _umount() {
 	umount mnt/
-	losetup -d /dev/loop0
+	losetup -d /dev/loop15
 }
 
 if [[ $1 == "mount" ]]; then
@@ -18,7 +19,9 @@ elif [[ $1 == "umount" ]]; then
 
 elif [[ $1 == "cp" ]]; then
 	_mount
+	sync
 	cp $2 mnt/$3
+	sync
 	_umount	
 
 else

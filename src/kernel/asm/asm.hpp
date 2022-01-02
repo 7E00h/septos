@@ -15,4 +15,7 @@ extern "C"
     uint8_t  _asm_in_8(uint16_t addr);
     uint16_t _asm_in_16(uint16_t addr);
     uint32_t _asm_in_32(uint16_t addr);
+
+    // CR3
+    void _asm_load_cr3(uint64_t value);
 }

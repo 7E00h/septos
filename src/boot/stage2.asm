@@ -12,12 +12,12 @@ stage2:
     mov di, KERNEL_STR
     call fat32_findfile
 
-    cmp di, 0
+    cmp edi, 0
     je no_kernel
 
     ; Put starting cluster in EAX
-    ; di contains starting cluster
-    movsx eax, di
+    ; DI contains starting cluster
+    mov eax, edi
     mov bx, 0x1000
     mov es, bx
 
