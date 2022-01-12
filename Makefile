@@ -2,7 +2,7 @@ SRC := src
 BIN := bin
 
 KRN_DIR   = src/kernel src/kernel/memory \
-			src/kernel/asm src/kernel/pci \
+			src/kernel/x64 src/kernel/pci \
 			src/kernel/drivers src/kernel/utility \
 			src/kernel/process src/kernel/process/elf
 KRN_SRC   = $(foreach dir,  $(KRN_DIR), $(wildcard $(dir)/*.cpp))

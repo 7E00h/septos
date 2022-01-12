@@ -1,6 +1,6 @@
 #include "virtual.hpp"
 
-#include <kernel/asm/asm.hpp>
+#include <kernel/x64/cpu.hpp>
 #include <kernel/memory/physical.hpp>
 #include <kernel/vga.hpp>
 #include <kernel/utility/utility.hpp>
@@ -46,12 +46,12 @@ static page_t* _get_entry(page_t page)
 static void _init_identity()
 {
     // Zero the page
-    utility::mem_zero((uint8_t*) IDENTITY_PAGE, 4096);
+    utility::memzro((uint8_t*) IDENTITY_PAGE, 4096);
 
     // Calculate total amount RAM in GB
     // This is used for large (1 GB) paging
     uint64_t mem_total = kernel::get_total_memory();
-    uint64_t gb        = utility::uint_divceil(mem_total, _1GB + 0UL);
+    uint64_t gb        = utility::divceil(mem_total, _1GB + 0UL);
 
     page_t* ident = (page_t*) IDENTITY_PAGE;
 
@@ -100,7 +100,7 @@ page_t* kernel::alloc_pagetable()
     frame_t new_frame = kernel::pmm_alloc(1);
     new_frame         = HIGH(new_frame);
 
-    utility::mem_zero((uint8_t*) new_frame, 4096);
+    utility::memzro((uint8_t*) new_frame, 4096);
 
     return (page_t*) new_frame;
 }
@@ -150,7 +150,7 @@ static void _map_4k(vaddr_t addr)
 
 void kernel::map(vaddr_t vaddr, size_t length)
 {
-    size_t pages = utility::uint_divceil(length, _4KB + 0UL);
+    size_t pages = utility::divceil(length, _4KB + 0UL);
     vaddr        = ALIGN(vaddr, _4KB);
 
     while (pages--)

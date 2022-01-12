@@ -1,6 +1,6 @@
 #include "pci.hpp"
 
-#include <kernel/asm/asm.hpp>
+#include <kernel/x64/cpu.hpp>
 #include <kernel/memory/kmalloc.hpp>
 #include <kernel/vga.hpp>
 

@@ -33,9 +33,6 @@ static process_t* _peek()
     return _queue[_front];
 }
 
-// _queue[0] = elf
-// _queue[1] = kernel
-
 static void _enqueue(process_t* p)
 {
     if (_amount == CAPACITY)
@@ -87,7 +84,7 @@ void scheduler_context_switch(cpu_state_t* cpu_state)
 
 void kernel::scheduler_init()
 {
-    const uint16_t TIME_QUANTUM = 11;
+    const uint16_t TIME_QUANTUM = 100; // 100 Hz, or 10 ms
     kernel::idt_install_gate(_asm_isr_timer, 32);
     kernel::init_pit(TIME_QUANTUM);
 }

@@ -1,6 +1,6 @@
 #include "idt.hpp"
 
-#include <kernel/asm/asm.hpp>
+#include <kernel/x64/cpu.hpp>
 #include <kernel/vga.hpp>
 
 struct idt_entry_t

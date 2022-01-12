@@ -23,7 +23,7 @@ void _load_elf_segments(uintptr_t base, elf_program_hdr* hdr, uint16_t amt)
         size_t    size   = cur->p_filesz;        // Size of segment
 
         kernel::map(dest, size);
-        utility::mem_copy((uint8_t*) offset, (uint8_t*) dest, size);
+        utility::memcpy((uint8_t*) offset, (uint8_t*) dest, size);
     }
 }
 
@@ -61,7 +61,7 @@ void kernel::create_process_from_image(uint8_t* image, process_t* out)
     out->main_thread.cpu_state->int_frame.rflags = (1 << 9);
     out->main_thread.cpu_state->int_frame.ss     = 0x10;
     out->main_thread.cpu_state->int_frame.cs     = 0x08;
-    utility::mem_zero((uint8_t*) &out->main_thread.cpu_state->regs, sizeof(regs_t));
+    utility::memzro((uint8_t*) &out->main_thread.cpu_state->regs, sizeof(regs_t));
 
     // Return to previous address space
     kernel::load_address_space(old);

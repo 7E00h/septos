@@ -1,30 +1,32 @@
 #pragma once
 
+#include <kernel/int.hpp>
+
 #include <kernel/memory/virtual.hpp>
-#include <kernel/idt.hpp>
+#include <kernel/x64/idt.hpp>
 
 namespace kernel
 {
-    using pid_t = uint64_t;
+    using pid_t = u64;
 
     struct regs_t
     {
-        uint64_t rax;
-        uint64_t rbx;
-        uint64_t rcx;
-        uint64_t rdx;
-        uint64_t rsi;
-        uint64_t rdi;
-        uint64_t rbp;
+        u64 rax;
+        u64 rbx;
+        u64 rcx;
+        u64 rdx;
+        u64 rsi;
+        u64 rdi;
+        u64 rbp;
 
-        uint64_t r8;
-        uint64_t r9;
-        uint64_t r10;
-        uint64_t r11;
-        uint64_t r12;
-        uint64_t r13;
-        uint64_t r14;
-        uint64_t r15;
+        u64 r8;
+        u64 r9;
+        u64 r10;
+        u64 r11;
+        u64 r12;
+        u64 r13;
+        u64 r14;
+        u64 r15;
     } __attribute__((packed));
 
     struct cpu_state_t
@@ -53,9 +55,7 @@ namespace kernel
         state_e state;
         page_t* vms;
         thread  main_thread;
-
-        uint8_t* text_buffer;
     };
 
-    void create_process_from_image(uint8_t* image, process_t* out);
+    void create_process_from_image(u8* image, process_t* out);
 }

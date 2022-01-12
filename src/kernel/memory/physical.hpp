@@ -1,7 +1,6 @@
 #pragma once
 
-#include <stdint.h>
-#include <stddef.h>
+#include <kernel/int.hpp>
 
 namespace kernel
 {
@@ -16,14 +15,14 @@ namespace kernel
 
     struct mem_info_t
     {
-        uint64_t base;
-        uint64_t length;
-        uint32_t type;
-        uint32_t acpi_extended;
+        u64 base;
+        u64 length;
+        u32 type;
+        u32 acpi_extended;
     } __attribute__((packed));
 
-    using frame_t = uint64_t;
-    using paddr_t = uint8_t*;
+    using frame_t = u64;
+    using paddr_t = u64;
 
     void pmm_init(mem_info_t* mem_info, size_t amt);
 

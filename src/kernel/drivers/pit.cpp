@@ -1,6 +1,6 @@
 #include "pit.hpp"
 
-#include <kernel/asm/asm.hpp>
+#include <kernel/x64/cpu.hpp>
 
 using namespace kernel;
 

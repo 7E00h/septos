@@ -3,7 +3,7 @@
 
 #include "pic.hpp"
 
-#include <kernel/asm/asm.hpp>
+#include <kernel/x64/cpu.hpp>
 
 #define PIC_MASTER      0x20
 #define PIC_MASTER_DATA 0x21
