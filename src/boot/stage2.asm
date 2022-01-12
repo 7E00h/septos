@@ -84,12 +84,27 @@ enable_unreal:
 
 mode_long:
     ; -- Switch to long mode --
-    ; Zero tables
+ 
+    ; Zero PML4
+    mov edi, PML4
+
+    xor eax, eax
+    mov es, ax
+    mov ecx, 0x400
+    cld
+    rep stosd
+
+    ; Zero PDP
+    push edi
+    mov edi, PDP
+    xor eax, eax
+    mov ecx, 0x400
+    rep stosd
+
+    pop edi
+
     mov edi, PML4
     mov cr3, edi
-    xor eax, eax
-    mov ecx, 0x1000
-    rep stosd
     mov edi, cr3
 
     ; Populate entries for 1 GB identity map
@@ -211,6 +226,7 @@ load_elf:
     mov rdi, MEM_INFO
     xor rsi, rsi
     mov si, [MEM_INFO_AMT]
+    mov rsp, 0xA000
     call r15
     hlt
 

@@ -47,6 +47,10 @@ void kernel::pic_init()
     // Restore masks
     _asm_out_8(PIC_MASTER_DATA, imr1);
     _asm_out_8(PIC_SLAVE_DATA,  imr2);
+
+    // Disable all hardware interrupts for now
+    for (uint8_t i = 0; i < 16; i++)
+        pic_disable(i);
 }
 
 void kernel::pic_enable(uint8_t irq)

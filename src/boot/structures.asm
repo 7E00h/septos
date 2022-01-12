@@ -27,6 +27,7 @@ MEM_INFO      equ 0x5200 ; 0x5200 - 0x5400: Memory information structure from IN
 MEM_INFO_AMT  equ 0x5400 ; 0x5400 - 0x5002: Amount of entries in the above structure
 PML4          equ 0x6000 ; Page
 PDP           equ 0x7000 ; Page
+IDENTITY      equ 0x8000 ; Identity page
 
 STAGE2        equ 0xA000 ; 0xA000 - 0xF000: STAGE2.BIN
 

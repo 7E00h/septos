@@ -17,10 +17,20 @@
 
 namespace kernel
 {
-    using vaddr_t = uint8_t*;
+    using vaddr_t = uint64_t;
     using page_t  = uint64_t;
 
+    extern const uint64_t ID_OFFSET;
+    extern const uint64_t IDENTITY_PAGE;
+    extern const uint64_t L3P;
+    extern const uint64_t L4P;
+
     void    vmm_init();
-    page_t* create_address_space();
+    vaddr_t create_address_space();
     page_t* alloc_pagetable();
+
+    void map(vaddr_t vaddr, size_t length);
+
+    void load_address_space(page_t* root);
+    page_t* read_address_space();
 }

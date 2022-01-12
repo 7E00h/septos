@@ -9,6 +9,7 @@ global _asm_in_16
 global _asm_in_32
 
 global _asm_load_cr3
+global _asm_read_cr3
 
 section .text
 
@@ -68,4 +69,8 @@ _asm_in_32:
 
 _asm_load_cr3:
     mov cr3, rdi
+    ret
+
+_asm_read_cr3:
+    mov rax, cr3
     ret
